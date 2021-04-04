@@ -1,16 +1,17 @@
 import 'dart:async';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:roll_rush/colors.dart';
 import 'package:roll_rush/falling_box.dart';
+import 'package:roll_rush/game_info_controller.dart';
 import 'package:roll_rush/main.dart';
 
 class GameArea extends StatefulWidget {
   final Size screenSize;
   final bool gameInView;
-  final Function gameEndAnimation;
+  final Function gameEnd;
 
-  const GameArea({Key key, this.screenSize,this.gameInView, this.gameEndAnimation}) : super(key: key);
+  const GameArea({Key key, this.screenSize,this.gameInView, this.gameEnd}) : super(key: key);
   @override
   _GameAreaState createState() => _GameAreaState();
 }
@@ -74,6 +75,7 @@ class _GameAreaState extends State<GameArea>
       ));
       boxesController.sink.add(children);
     });
+
   }
 
   checkOffset(Offset x, int index, Color color) {
@@ -93,6 +95,14 @@ class _GameAreaState extends State<GameArea>
     if (collide) {
       // mcolor = color;
       gottenIndexes.add(index);
+      if(color==primary){
+        context.read(gameInfoProvider).incrementScore();
+      }else{
+        boxTimer.cancel();
+        children=[];
+        boxesController.sink.add(children);
+        widget.gameEnd();
+      }
       setState(() {});
     } else {
       checkingIndexes.removeWhere((element) => element == index);
@@ -137,7 +147,7 @@ class _GameAreaState extends State<GameArea>
                     Offset(ballOffset.dx + ballTimelyOffset, ballOffset.dy);
               }
             }
-            setState(() {});
+            if(mounted)setState(() {});
           });
         } else {
           ballTimer = Timer.periodic(Duration(milliseconds: ballOffsetDuration),
@@ -161,7 +171,7 @@ class _GameAreaState extends State<GameArea>
                     Offset(ballOffset.dx - ballTimelyOffset, ballOffset.dy);
               }
             }
-            setState(() {});
+            if(mounted)setState(() {});
           });
         }
       },

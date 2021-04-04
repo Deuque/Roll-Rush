@@ -5,9 +5,9 @@ import 'package:roll_rush/game_info_controller.dart';
 
 class Home extends StatelessWidget {
   final double yOffset;
-  final Function gameStartAnimation;
+  final Function gameStart;
 
-  const Home({Key key, this.yOffset, this.gameStartAnimation}) : super(key: key);
+  const Home({Key key, this.yOffset, this.gameStart}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +20,15 @@ class Home extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              '0',
-              style: TextStyle(
-                  fontSize: (size.height - yOffset) * .3,
-                  color: yOffset > 0 ? white : primary),
+            Consumer(
+                builder: (context, watch, child) {
+                return Text(
+                  '${watch(gameInfoProvider).score}',
+                  style: TextStyle(
+                      fontSize: (size.height - yOffset) * .3,
+                      color: yOffset > 0 ? white : primary),
+                );
+              }
             ),
             SizedBox(
               height: 10,
@@ -54,7 +58,7 @@ class Home extends StatelessWidget {
                   Expanded(
                     child: Center(
                         child: InkWell(
-                            onTap: gameStartAnimation,
+                            onTap: gameStart,
                             child:  Consumer(
                                 builder: (context, watch, child) {
                                 return Image.asset(

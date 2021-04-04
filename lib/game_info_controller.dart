@@ -18,7 +18,7 @@ class GameInfo extends ChangeNotifier {
   }
 
   void incrementScore(){
-    score++;
+    score=score+1;
     notifyListeners();
   }
 

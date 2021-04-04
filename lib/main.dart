@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:roll_rush/colors.dart';
 import 'package:roll_rush/game_area.dart';
+import 'package:roll_rush/game_info_controller.dart';
 import 'package:roll_rush/home.dart';
 
 void main() {
@@ -73,16 +74,18 @@ class _DashboardState extends State<Dashboard>
                       key: Key((offsetAnimation2.value == 0).toString()),
                       screenSize: size,
                       gameInView: offsetAnimation2.value == 0,
-                      gameEndAnimation: (){
+                      gameEnd: (){
                         controller.reverse();
+                        context.read(gameInfoProvider).gameEnded();
                       }
                     )),
                 Transform.translate(
                     offset: Offset(0.0, size.height * offsetAnimation.value),
                     child: Home(
                       yOffset: size.height * offsetAnimation.value,
-                        gameStartAnimation: (){
+                        gameStart: (){
                           controller.forward();
+                          context.read(gameInfoProvider).gameStarted();
                         }
                     ))
               ],
