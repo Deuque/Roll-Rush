@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:roll_rush/colors.dart';
-import 'package:roll_rush/dashboard.dart';
+import 'package:roll_rush/Screen/dashboard.dart';
+import 'package:roll_rush/Util/colors.dart';
 
 class Splash extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class _SplashState extends State<Splash> {
     // TODO: implement initState
     super.initState();
     Future.delayed(Duration(milliseconds: 1000), () =>
-        Navigator.push(
+        Navigator.pushReplacement(
             context, CupertinoPageRoute(builder: (_) => Dashboard())));
   }
 

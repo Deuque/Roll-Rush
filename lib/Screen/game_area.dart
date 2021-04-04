@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:roll_rush/colors.dart';
-import 'package:roll_rush/falling_box.dart';
-import 'package:roll_rush/flare.dart';
-import 'package:roll_rush/game_info_controller.dart';
+import 'package:roll_rush/Controller/game_info_controller.dart';
+import 'package:roll_rush/Util/colors.dart';
+import 'package:roll_rush/Util/helper_functions.dart';
+import 'package:roll_rush/Widget/falling_box.dart';
+import 'package:roll_rush/Widget/flare.dart';
 import 'package:roll_rush/main.dart';
-import 'package:roll_rush/util.dart';
 
 class GameArea extends StatefulWidget {
   final Size screenSize;
   final bool gameInView;
-  final Function gameEnd;
+  final Future<bool> Function() gameEnd;
 
   const GameArea({Key key, this.screenSize,this.gameInView, this.gameEnd}) : super(key: key);
   @override
@@ -35,12 +35,15 @@ class _GameAreaState extends State<GameArea>
   Offset ballOffset;
   Color ballColor = primary;
   double ballSize = 42;
+  double ballFieldHeight = 42;
   double ballTimelyOffset = 1.5;
   int ballOffsetDuration = 1;
   double ballFieldBegin = 0.1;
   double ballFieldEnd = 0.9;
 
   Timer boxTimer;
+
+
 
 
   @override
@@ -113,18 +116,32 @@ class _GameAreaState extends State<GameArea>
       if(color==primary){
         playSound('score.mp3',context);
         context.read(gameInfoProvider).incrementScore();
-        setState(() {});
+
       }else{
         boxTimer.cancel();
         ballTimer.cancel();
         ballSize = 0;
-        setState(() {});
+
         playSound('end.wav',context);
         children=[];
         boxesController.sink.add(children);
         flareController.sink.add(List<Widget>.generate(30, (index) => Flare(initialOffset: ballOffset,screenSize: widget.screenSize,)));
-        Future.delayed(Duration(seconds: 1),widget.gameEnd);
+        Future.delayed(Duration(seconds: 1),(){
+          flareController.sink.add(<Widget>[]);
+          widget.gameEnd().then((value){
+            if(value){
+              setFallingBoxesTimer();
+              ballSize = 42;
+              setState(() {
+
+              });
+            }
+          });
+        });
+
+
       }
+      setState(() {});
 
     } else {
       checkingIndexes.removeWhere((element) => element == index);
@@ -248,7 +265,7 @@ class _GameAreaState extends State<GameArea>
                 right: size.width * ballFieldBegin,
                 child: Container(
                   width: double.infinity,
-                  height: ballSize,
+                  height: ballFieldHeight,
                   decoration: BoxDecoration(
                     color: black.withOpacity(.15),
                     borderRadius: BorderRadius.circular(25),
@@ -280,6 +297,7 @@ class _GameAreaState extends State<GameArea>
                   },
                 ),
               ),
+
             ],
           ),
         ),

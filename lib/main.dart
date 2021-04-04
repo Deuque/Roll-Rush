@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:roll_rush/colors.dart';
-import 'package:roll_rush/dashboard.dart';
-import 'package:roll_rush/splash.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:roll_rush/Screen/splash.dart';
+import 'package:roll_rush/Util/colors.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
   SystemChrome.setPreferredOrientations(
           [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown])
       .then((value) => runApp(ProviderScope(child: MyApp())));

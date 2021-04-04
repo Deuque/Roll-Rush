@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:roll_rush/colors.dart';
-import 'package:roll_rush/game_info_controller.dart';
+import 'package:roll_rush/Controller/game_info_controller.dart';
+import 'package:roll_rush/Util/colors.dart';
 
 enum xAxisDirection { postive, negative }
 
@@ -29,8 +29,8 @@ class _FallingBoxState extends State<FallingBox> with TickerProviderStateMixin {
   double boxSize;
 
   setInitialOffset() {
-    List colors = [white, primary, white, white];
-    color = colors[Random().nextInt(colors.length - 1)];
+    // List colors = [white, primary, white, white];
+    color = Random().nextInt(4) == 1 ? primary : white;
     boxSize = color == primary
         ? 37
         : context.read(gameInfoProvider).level == 1

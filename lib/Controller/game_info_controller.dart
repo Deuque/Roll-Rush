@@ -1,4 +1,4 @@
-import 'package:audioplayers/audio_cache.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +13,7 @@ class GameInfo extends ChangeNotifier {
   int level = 1;
   bool newHighScore = false;
   bool speakerOn = true;
+  bool seenRewardAds = false;
 
 
   void initGameValues() async {
@@ -34,6 +35,7 @@ class GameInfo extends ChangeNotifier {
   void gameStarted(){
     score = 0;
     newHighScore = false;
+    seenRewardAds = false;
     notifyListeners();
   }
 
@@ -46,6 +48,11 @@ class GameInfo extends ChangeNotifier {
 
   void toggleSpeaker(){
     speakerOn = !speakerOn;
+    notifyListeners();
+  }
+
+  void toggleSeenRewardAds(){
+    seenRewardAds = true;
     notifyListeners();
   }
 

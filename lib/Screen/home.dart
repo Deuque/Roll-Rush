@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:roll_rush/colors.dart';
-import 'package:roll_rush/game_info_controller.dart';
+import 'package:roll_rush/Controller/game_info_controller.dart';
+import 'package:roll_rush/Util/colors.dart';
 
 class Home extends StatelessWidget {
   final double yOffset;

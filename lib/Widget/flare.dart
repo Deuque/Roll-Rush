@@ -1,7 +1,6 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:roll_rush/colors.dart';
+import 'package:roll_rush/Util/colors.dart';
 
 class Flare extends StatefulWidget {
   final Offset initialOffset;
@@ -21,6 +20,7 @@ class _FlareState extends State<Flare> with SingleTickerProviderStateMixin {
   Animation offsetAnimation;
   Size size;
   double flareSize =0;
+
 
   setInitialOffset() {
     flareSize = 1+ Random().nextInt(6).toDouble();
