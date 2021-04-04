@@ -1,16 +1,17 @@
 import 'dart:math';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:roll_rush/colors.dart';
+import 'package:roll_rush/game_info_controller.dart';
 
 enum xAxisDirection { postive, negative }
 
 class FallingBox extends StatefulWidget {
-  final Function(Offset x, int index, Color color) checkOffset;
-  int index;
-  Size screenSize;
+  final Function(Offset x, int index, Color color, double boxSize) checkOffset;
+  final int index;
+  final Size screenSize;
 
-  FallingBox({Key key, this.checkOffset, this.index,this.screenSize})
+  FallingBox({Key key, this.checkOffset, this.index, this.screenSize})
       : super(key: key);
 
   @override
@@ -25,46 +26,52 @@ class _FallingBoxState extends State<FallingBox> with TickerProviderStateMixin {
   Animation rotationAnimation;
   Size size;
   Color color;
+  double boxSize;
 
   setInitialOffset() {
-    List colors = [
-      white,
-      primary,
-      white,
-      white
-    ];
+    List colors = [white, primary, white, white];
     color = colors[Random().nextInt(colors.length - 1)];
+    boxSize = color == primary
+        ? 37
+        : context.read(gameInfoProvider).level == 1
+            ? 37
+            : context.read(gameInfoProvider).level == 2
+                ? Random().nextInt(4) == 1
+                    ? (40 + Random().nextInt(25)).toDouble()
+                    : 37
+                : Random().nextInt(4) == 1
+                    ? (50 + Random().nextInt(40)).toDouble()
+                    : 37;
+    //print(boxSize);
     size = widget.screenSize;
     double xAxis =
         -100 + Random().nextInt(size.width.round() + 100).ceilToDouble();
     double yAxis = Random().nextInt((size.height * .1).round()).ceilToDouble();
-    // print(xAxis);
-    // print(yAxis);
-    // print(size.width);
+
     offset = Offset(xAxis, 0);
     direction = xAxis < size.width / 2
         ? xAxisDirection.postive
         : xAxisDirection.negative;
 
     controller =
-    new AnimationController(vsync: this, duration: Duration(seconds: 3));
+        new AnimationController(vsync: this, duration: Duration(seconds: 3));
     controller2 =
-    new AnimationController(vsync: this, duration: Duration(seconds: 12));
+        new AnimationController(vsync: this, duration: Duration(seconds: 12));
     offsetAnimation = Tween<Offset>(
-        begin: offset,
-        end: Offset(
-            direction == xAxisDirection.postive
-                ? (size.width / 2) + ((size.width / 2) - offset.dx)
-                : (size.width / 2) - (offset.dx - (size.width / 2)),
-            size.height * .7))
+            begin: offset,
+            end: Offset(
+                direction == xAxisDirection.postive
+                    ? (size.width / 2) + ((size.width / 2) - offset.dx)
+                    : (size.width / 2) - (offset.dx - (size.width / 2)),
+                size.height * .7))
         .animate(controller);
     rotationAnimation = Tween<double>(
-        begin: 0,
-        end: direction == xAxisDirection.postive ? -2 * pi : 2 * pi)
+            begin: 0,
+            end: direction == xAxisDirection.postive ? -2 * pi : 2 * pi)
         .animate(controller2);
 
     controller.addListener(() {
-      widget.checkOffset(offsetAnimation.value, widget.index, color);
+      widget.checkOffset(offsetAnimation.value, widget.index, color, boxSize);
     });
     controller.forward();
 
@@ -93,15 +100,14 @@ class _FallingBoxState extends State<FallingBox> with TickerProviderStateMixin {
         AnimatedBuilder(
             animation: controller,
             builder: (context, snapshot) {
-
               return Transform.translate(
                 offset: offsetAnimation.value,
                 child: Transform.rotate(
                   angle: rotationAnimation.value,
                   child: Container(
-                    height: 35,
-                    width: 35,
-                    color:  color,
+                    height: boxSize,
+                    width: boxSize,
+                    color: color,
                   ),
                 ),
               );

@@ -71,11 +71,20 @@ class Home extends StatelessWidget {
                   ),
                   Expanded(
                     child: Center(
-                        child: Image.asset(
-                      'assets/volume.png',
+                        child: InkWell(
+                          onTap: (){
+                            context.read(gameInfoProvider).toggleSpeaker();
+                          },
+                          child: Consumer(
+                              builder: (context, watch, child) {
+                              return Image.asset(
+                                watch(gameInfoProvider).speakerOn ? 'assets/volume.png': 'assets/volume_off.png',
                       height: size.width * .1,
                       color: white.withOpacity(.7),
-                    )),
+                    );
+                            }
+                          ),
+                        )),
                   ),
                 ],
               )
