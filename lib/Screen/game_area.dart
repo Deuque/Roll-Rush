@@ -36,7 +36,7 @@ class _GameAreaState extends State<GameArea>
   Color ballColor = primary;
   double ballSize = 42;
   double ballFieldHeight = 42;
-  double ballTimelyOffset = 1.5;
+  double ballTimelyOffset = 0.7;
   int ballOffsetDuration = 1;
   double ballFieldBegin = 0.1;
   double ballFieldEnd = 0.9;
@@ -152,7 +152,7 @@ class _GameAreaState extends State<GameArea>
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-
+    //ballTimelyOffset = size.width*.001;
     return GestureDetector(
       onTapDown: (details) {
         playSound('tap.wav',context);
@@ -168,10 +168,12 @@ class _GameAreaState extends State<GameArea>
         if (right) {
           ballTimer = Timer.periodic(Duration(milliseconds: ballOffsetDuration),
               (Timer t) {
+
             if (right) {
               if (ballOffset.dx < size.width * ballFieldEnd - ballSize) {
                 ballOffset =
                     Offset(ballOffset.dx + ballTimelyOffset, ballOffset.dy);
+                print(ballOffset);
               } else {
                 right = false;
                 ballOffset =

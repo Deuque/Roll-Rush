@@ -27,7 +27,7 @@ class _RewardLoaderState extends State<RewardLoader>
     progressAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
     controller.addListener(() {
       if(controller.isCompleted){
-        Navigator.pop(context,true);
+        Navigator.pop(context,false);
       }
     });
     controller.forward();
@@ -52,8 +52,8 @@ class _RewardLoaderState extends State<RewardLoader>
                     animation: controller,
                     builder: (context, child) {
                       return Container(
-                        height: 150,
-                        width: 150,
+                        height: 170,
+                        width: 170,
                         child: CircularProgressIndicator(
                           strokeWidth: 10,
                           value: progressAnimation.value,
@@ -65,11 +65,32 @@ class _RewardLoaderState extends State<RewardLoader>
                 Positioned(
                   top: 0,right: 0,left: 0,bottom: 0,
                   child: Center(
-                    child: Text(
-                      'Continue',
-                      style: TextStyle(
-                          color: primary, fontWeight: FontWeight.w400,
-                          fontSize: 15),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Continue',
+                          style: TextStyle(
+                              color: white.withOpacity(.8), fontWeight: FontWeight.w400,
+                              fontSize: 15),
+                        ),
+                        SizedBox(height: 15,),
+                        ElevatedButton(
+                            onPressed: () {
+                              controller.stop();
+                              // widget.onCancel();
+                              Navigator.pop(context,true);
+                            },
+                            style: TextButton.styleFrom(
+                                backgroundColor: primary,
+                                shape: StadiumBorder()),
+                            child: Text(
+                              'Watch video',
+                              style: TextStyle(
+                                  color: white, fontWeight: FontWeight.w400,
+                                  fontSize: 14),
+                            ))
+                      ],
                     ),
                   ),
                 ),

@@ -8,7 +8,7 @@ final gameInfoProvider = ChangeNotifierProvider<GameInfo>((
 
 class GameInfo extends ChangeNotifier {
   bool firstPlay = true;
-  int previousScore=0;
+  int bestScore=0;
   int score=0;
   int level = 1;
   bool newHighScore = false;
@@ -17,7 +17,7 @@ class GameInfo extends ChangeNotifier {
 
 
   void initGameValues() async {
-    previousScore = await getGameValue('previousScore', 0);
+    bestScore = await getGameValue('bestScore', 0);
     speakerOn = await getGameValue('speakerOn', true );
     notifyListeners();
   }
@@ -40,15 +40,16 @@ class GameInfo extends ChangeNotifier {
   }
 
   void gameEnded(){
-    newHighScore = score > previousScore;
+    newHighScore = score > bestScore;
     if(firstPlay)firstPlay = false;
     notifyListeners();
-    setPreviousScore();
+    if(newHighScore)setBestScore();
   }
 
   void toggleSpeaker(){
     speakerOn = !speakerOn;
     notifyListeners();
+    saveGameValue('speakerOn', speakerOn);
   }
 
   void toggleSeenRewardAds(){
@@ -56,10 +57,10 @@ class GameInfo extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPreviousScore(){
-    previousScore = score;
+  void setBestScore(){
+    bestScore = score;
     notifyListeners();
-    saveGameValue('previousScore', previousScore);
+    saveGameValue('bestScore', bestScore);
   }
 
   saveGameValue(String key, dynamic value)async{
