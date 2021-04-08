@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:roll_rush/Controller/game_info_controller.dart';
 import 'package:roll_rush/Util/colors.dart';
+import 'package:roll_rush/Widget/star_life.dart';
 
 class Home extends StatelessWidget {
   final double yOffset;
@@ -23,15 +24,27 @@ class Home extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Consumer(
-                builder: (context, watch, child) {
-                return Text(
-                  '${watch(gameInfoProvider).score}',
-                  style: TextStyle(
-                      fontSize: (size.height - yOffset) * .3,
-                      color: yOffset > 0 ? white : primary),
-                );
-              }
+            if(yOffset==0)
+              Center(child: StarLife()),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Consumer(
+                    builder: (context, watch, child) {
+                    return Text(
+                      '${watch(gameInfoProvider).score}',
+                      style: TextStyle(
+                          fontSize: (size.height - yOffset) * .3,
+                          color: yOffset > 0 ? white : primary),
+                    );
+                  }
+                ),
+                if(yOffset >size.width/2)
+                  Padding(
+                    padding: const EdgeInsets.only(left:20.0),
+                    child: StarLife(),
+                  )
+              ],
             ),
             SizedBox(
               height: 10,

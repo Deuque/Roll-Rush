@@ -13,17 +13,17 @@ class GameArea extends StatefulWidget {
   final bool gameInView;
   final Future<bool> Function() gameEnd;
 
-  const GameArea({Key key, this.screenSize,this.gameInView, this.gameEnd}) : super(key: key);
+  const GameArea({Key key, this.screenSize, this.gameInView, this.gameEnd})
+      : super(key: key);
+
   @override
   _GameAreaState createState() => _GameAreaState();
 }
 
-class _GameAreaState extends State<GameArea>
-    with  WidgetsBindingObserver {
+class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
   List<Widget> children = [];
   int countFromStartPlaying = 0;
   List<Widget> flares = [];
-
 
   List<int> checkingIndexes = [];
   List<int> gottenIndexes = [];
@@ -36,15 +36,12 @@ class _GameAreaState extends State<GameArea>
   Color ballColor = primary;
   double ballSize = 42;
   double ballFieldHeight = 42;
-  double ballTimelyOffset = 0.7;
+  double ballTimelyOffset = 1.5;
   int ballOffsetDuration = 1;
   double ballFieldBegin = 0.1;
   double ballFieldEnd = 0.9;
 
   Timer boxTimer;
-
-
-
 
   @override
   void dispose() {
@@ -57,14 +54,13 @@ class _GameAreaState extends State<GameArea>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state == AppLifecycleState.paused){
-      if(boxTimer!=null && boxTimer.isActive) boxTimer.cancel();
+    if (state == AppLifecycleState.paused) {
+      if (boxTimer != null && boxTimer.isActive) boxTimer.cancel();
     }
-    if(state == AppLifecycleState.resumed){
-     setFallingBoxesTimer();
+    if (state == AppLifecycleState.resumed) {
+      setFallingBoxesTimer();
     }
   }
-
 
   @override
   void initState() {
@@ -72,37 +68,37 @@ class _GameAreaState extends State<GameArea>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     setFallingBoxesTimer();
-
   }
 
-  setFallingBoxesTimer(){
-    if(!widget.gameInView)ballSize = 0;
-    if(widget.gameInView)boxTimer = Timer.periodic(Duration(milliseconds: 1000), (Timer t) {
-      children.add(new FallingBox(
-        key: Key(children.length.toString()),
-        checkOffset: checkOffset,
-        index: children.length,
-        screenSize: widget.screenSize,
-      ));
-      //print(children.length);
-      if(ballOffset!=null) countFromStartPlaying++;
-      if(countFromStartPlaying==200){
-        context.read(gameInfoProvider).incrementLevel();
-      }else if(countFromStartPlaying==400){
-        context.read(gameInfoProvider).incrementLevel();
-      }
-      boxesController.sink.add(children);
-    });
-
+  setFallingBoxesTimer() {
+    if (!widget.gameInView) ballSize = 0;
+    if (widget.gameInView)
+      boxTimer = Timer.periodic(Duration(milliseconds: 1000), (Timer t) {
+        children.add(new FallingBox(
+          key: Key(children.length.toString()),
+          checkOffset: checkOffset,
+          index: children.length,
+          screenSize: widget.screenSize,
+          startedPlaying: ballOffset != null,
+        ));
+        //print(children.length);
+        // if(ballOffset!=null) countFromStartPlaying++;
+        // if(countFromStartPlaying==200){
+        //   context.read(gameInfoProvider).incrementLevel();
+        // }else if(countFromStartPlaying==400){
+        //   context.read(gameInfoProvider).incrementLevel();
+        // }
+        boxesController.sink.add(children);
+      });
   }
 
-  checkOffset(Offset x, int index, Color color, double boxSize) {
-    if (x == null || ballOffset == null || checkingIndexes.contains(index))
+  checkOffset(Offset x, int index, BoxAction boxAction, double boxSize) {
+    if (x == null || ballOffset == null || ballSize == 0 || checkingIndexes.contains(index))
       return;
     final position1 = x;
     final position2 = ballOffset;
     double s1 = boxSize;
-    double s2 = ballSize-5;
+    double s2 = ballSize - 5;
 
     final collide = (position1.dx < position2.dx + s2 &&
         position1.dx + s1 > position2.dx &&
@@ -113,36 +109,68 @@ class _GameAreaState extends State<GameArea>
     if (collide) {
       // mcolor = color;
       gottenIndexes.add(index);
-      if(color==primary){
-        playSound('score.mp3',context);
-        context.read(gameInfoProvider).incrementScore();
-
-      }else{
+      if (boxAction != BoxAction.kill) {
+        if (boxAction == BoxAction.add1Point) {
+          playSound('score.mp3', context);
+          context.read(gameInfoProvider).incrementScore(1);
+        } else if (boxAction == BoxAction.add2Points) {
+          playSound('score.mp3', context);
+          context.read(gameInfoProvider).incrementScore(2);
+        } else if (boxAction == BoxAction.add3Points) {
+          playSound('score.mp3', context);
+          context.read(gameInfoProvider).incrementScore(3);
+        } else if (boxAction == BoxAction.remove2Points) {
+          playSound('end.wav', context);
+          flareController.sink.add(List<Widget>.generate(
+              4,
+              (index) => Flare(
+                    initialOffset: ballOffset,
+                    screenSize: widget.screenSize,
+                  )));
+          Future.delayed(Duration(seconds: 1), () {
+            flareController.sink.add(<Widget>[]);
+          });
+          context.read(gameInfoProvider).decrementScore(2);
+        } else if (boxAction == BoxAction.remove3Points) {
+          playSound('end.wav', context);
+          flareController.sink.add(List<Widget>.generate(
+              7,
+              (index) => Flare(
+                    initialOffset: ballOffset,
+                    screenSize: widget.screenSize,
+                  )));
+          Future.delayed(Duration(seconds: 1), () {
+            flareController.sink.add(<Widget>[]);
+          });
+          context.read(gameInfoProvider).decrementScore(3);
+        } else if (boxAction == BoxAction.addExtraLife) {
+          playSound('score.mp3', context);
+          context.read(gameInfoProvider).incrementLives();
+        }
+      } else {
         boxTimer.cancel();
         ballTimer.cancel();
         ballSize = 0;
 
-        playSound('end.wav',context);
-        children=[];
-        boxesController.sink.add(children);
-        flareController.sink.add(List<Widget>.generate(30, (index) => Flare(initialOffset: ballOffset,screenSize: widget.screenSize,)));
-        Future.delayed(Duration(seconds: 1),(){
+        playSound('end.wav', context);
+        flareController.sink.add(List<Widget>.generate(
+            30,
+            (index) => Flare(
+                  initialOffset: ballOffset,
+                  screenSize: widget.screenSize,
+                )));
+        Future.delayed(Duration(seconds: 1), () {
           flareController.sink.add(<Widget>[]);
-          widget.gameEnd().then((value){
-            if(value){
+          widget.gameEnd().then((value) {
+            if (value) {
               setFallingBoxesTimer();
               ballSize = 42;
-              setState(() {
-
-              });
+              setState(() {});
             }
           });
         });
-
-
       }
       setState(() {});
-
     } else {
       checkingIndexes.removeWhere((element) => element == index);
       setState(() {});
@@ -155,7 +183,7 @@ class _GameAreaState extends State<GameArea>
     //ballTimelyOffset = size.width*.001;
     return GestureDetector(
       onTapDown: (details) {
-        playSound('tap.wav',context);
+        playSound('tap.wav', context);
         ballOffset = ballOffset ?? _ballKey.globalPaintBounds.topLeft;
         bool right;
         if (details.globalPosition.dx > size.width / 2) {
@@ -168,12 +196,10 @@ class _GameAreaState extends State<GameArea>
         if (right) {
           ballTimer = Timer.periodic(Duration(milliseconds: ballOffsetDuration),
               (Timer t) {
-
             if (right) {
               if (ballOffset.dx < size.width * ballFieldEnd - ballSize) {
                 ballOffset =
                     Offset(ballOffset.dx + ballTimelyOffset, ballOffset.dy);
-                print(ballOffset);
               } else {
                 right = false;
                 ballOffset =
@@ -189,7 +215,7 @@ class _GameAreaState extends State<GameArea>
                     Offset(ballOffset.dx + ballTimelyOffset, ballOffset.dy);
               }
             }
-            if(mounted)setState(() {});
+            if (mounted) setState(() {});
           });
         } else {
           ballTimer = Timer.periodic(Duration(milliseconds: ballOffsetDuration),
@@ -213,12 +239,11 @@ class _GameAreaState extends State<GameArea>
                     Offset(ballOffset.dx - ballTimelyOffset, ballOffset.dy);
               }
             }
-            if(mounted)setState(() {});
+            if (mounted) setState(() {});
           });
         }
       },
       child: Scaffold(
-
         body: Container(
           height: double.infinity,
           width: double.infinity,
@@ -256,9 +281,12 @@ class _GameAreaState extends State<GameArea>
                 ),
               ),
               Positioned(
-                top: size.height*.65,left: 0,right: 0,bottom: 0,
+                top: size.height * .65,
+                left: 0,
+                right: 0,
+                bottom: 0,
                 child: Container(
-                 color: dark,
+                  color: dark,
                 ),
               ),
               Positioned(
@@ -293,13 +321,16 @@ class _GameAreaState extends State<GameArea>
                 child: StreamBuilder(
                   stream: flareController.stream,
                   builder: (_, snap) {
-                    return !snap.hasData ? SizedBox(height: 0,) : Stack(
-                      children: snap.data,
-                    );
+                    return !snap.hasData
+                        ? SizedBox(
+                            height: 0,
+                          )
+                        : Stack(
+                            children: snap.data,
+                          );
                   },
                 ),
               ),
-
             ],
           ),
         ),

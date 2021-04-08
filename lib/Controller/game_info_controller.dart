@@ -11,6 +11,7 @@ class GameInfo extends ChangeNotifier {
   int bestScore=0;
   int score=0;
   int level = 1;
+  int lives = 0;
   bool newHighScore = false;
   bool speakerOn = true;
   bool seenRewardAds = false;
@@ -19,12 +20,31 @@ class GameInfo extends ChangeNotifier {
   void initGameValues() async {
     bestScore = await getGameValue('bestScore', 0);
     speakerOn = await getGameValue('speakerOn', true );
+    lives = await getGameValue('lives', 0 );
     notifyListeners();
   }
 
-  void incrementScore(){
-    score=score+1;
+  void incrementScore(int amount){
+    score=score+amount;
     notifyListeners();
+  }
+
+  void decrementScore(int amount){
+    score=score-amount;
+    if(score<0)score=0;
+    notifyListeners();
+  }
+
+  void incrementLives(){
+    lives = lives + 1;
+    notifyListeners();
+    saveGameValue('lives', lives);
+  }
+
+  void decrementLives(){
+    lives = lives - 1;
+    notifyListeners();
+    saveGameValue('lives', lives);
   }
 
   void incrementLevel(){

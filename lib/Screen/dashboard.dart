@@ -6,6 +6,7 @@ import 'package:roll_rush/Controller/game_info_controller.dart';
 import 'package:roll_rush/Screen/game_area.dart';
 import 'package:roll_rush/Screen/home.dart';
 import 'package:roll_rush/Widget/reward_loader.dart';
+import 'package:roll_rush/Widget/star_life.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -27,7 +28,7 @@ class _DashboardState extends State<Dashboard>
     super.initState();
     controller = new AnimationController(
         vsync: this, duration: Duration(milliseconds: 700));
-    offsetAnimation = Tween<double>(begin: 0, end: .65).animate(
+    offsetAnimation = Tween<double>(begin: 0, end: .75).animate(
         CurvedAnimation(parent: controller, curve: Curves.easeInOutCirc));
     offsetAnimation2 = Tween<double>(begin: -0.4, end: 0).animate(
         CurvedAnimation(parent: controller, curve: Curves.easeInOutCirc));
@@ -73,6 +74,7 @@ class _DashboardState extends State<Dashboard>
           builder: (context, child) {
             return Stack(
               children: [
+
                 Transform.translate(
                     offset: Offset(0.0, size.height * offsetAnimation2.value),
                     child: GameArea(
@@ -81,39 +83,57 @@ class _DashboardState extends State<Dashboard>
                         gameInView: offsetAnimation2.value == 0,
                         gameEnd: () async {
 
-                          controller.reverse();
-                          context.read(gameInfoProvider).gameEnded();
-                          return Future.value(false);
-
-                          if (context.read(gameInfoProvider).seenRewardAds) {
+                          if(context.read(gameInfoProvider).lives==0) {
                             controller.reverse();
                             context.read(gameInfoProvider).gameEnded();
                             return Future.value(false);
                           }
-
-                          if(!(await myRewarded.isLoaded())){
-                            controller.reverse();
-                            context.read(gameInfoProvider).gameEnded();
-                            return Future.value(false);
-                          }
-
-                          context.read(gameInfoProvider).toggleSeenRewardAds();
-
                           var response = await showDialog(
                               context: context,
                               builder: (_) => Dialog(
-                                    insetPadding: EdgeInsets.zero,
-                                    elevation: 0,
-                                    backgroundColor: Colors.transparent,
-                                    child: RewardLoader(),
-                                  ));
+                                insetPadding: EdgeInsets.zero,
+                                elevation: 0,
+                                backgroundColor: Colors.transparent,
+                                child: RewardLoader(),
+                              ));
 
-                          if (!response) {
+                          if(response){
+                            context.read(gameInfoProvider).decrementLives();
+                          }else{
                             controller.reverse();
                             context.read(gameInfoProvider).gameEnded();
-                          } else {
-                             myRewarded.show();
                           }
+                          return response;
+                          //
+                          // if (context.read(gameInfoProvider).seenRewardAds) {
+                          //   controller.reverse();
+                          //   context.read(gameInfoProvider).gameEnded();
+                          //   return Future.value(false);
+                          // }
+                          //
+                          // if(!(await myRewarded.isLoaded())){
+                          //   controller.reverse();
+                          //   context.read(gameInfoProvider).gameEnded();
+                          //   return Future.value(false);
+                          // }
+                          //
+                          // context.read(gameInfoProvider).toggleSeenRewardAds();
+                          //
+                          // var response = await showDialog(
+                          //     context: context,
+                          //     builder: (_) => Dialog(
+                          //           insetPadding: EdgeInsets.zero,
+                          //           elevation: 0,
+                          //           backgroundColor: Colors.transparent,
+                          //           child: RewardLoader(),
+                          //         ));
+                          //
+                          // if (!response) {
+                          //   controller.reverse();
+                          //   context.read(gameInfoProvider).gameEnded();
+                          // } else {
+                          //    myRewarded.show();
+                          // }
 
                           return response;
                         })),

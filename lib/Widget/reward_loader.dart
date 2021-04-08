@@ -71,10 +71,11 @@ class _RewardLoaderState extends State<RewardLoader>
                         Text(
                           'Continue',
                           style: TextStyle(
-                              color: white.withOpacity(.8), fontWeight: FontWeight.w400,
+                              color: primary, fontWeight: FontWeight.w400,
                               fontSize: 15),
                         ),
                         SizedBox(height: 15,),
+
                         ElevatedButton(
                             onPressed: () {
                               controller.stop();
@@ -82,14 +83,23 @@ class _RewardLoaderState extends State<RewardLoader>
                               Navigator.pop(context,true);
                             },
                             style: TextButton.styleFrom(
-                                backgroundColor: primary,
+                                backgroundColor: white.withOpacity(.2),
                                 shape: StadiumBorder()),
-                            child: Text(
-                              'Watch video',
-                              style: TextStyle(
-                                  color: white, fontWeight: FontWeight.w400,
-                                  fontSize: 14),
-                            ))
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset('assets/star.png',height: 16,),
+                                SizedBox(width: 6,),
+                                Text(
+                                  '1',
+                                  style: TextStyle(
+                                      color: white.withOpacity(.8),
+                                      fontSize: 16
+                                  ),
+                                )
+                              ],
+                            ),)
                       ],
                     ),
                   ),
