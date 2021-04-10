@@ -35,23 +35,23 @@ class _FallingBoxState extends State<FallingBox> with TickerProviderStateMixin {
   String boxText = '';
 
   setBoxProperties(){
-    if(widget.index < 20 || !widget.startedPlaying){
+    if(widget.index < 40 || !widget.startedPlaying){
 
       color = Random().nextInt(4) == 1 ? primary : white;
       boxAction = color == white ? BoxAction.kill : BoxAction.add1Point;
 
 
-    }else if((widget.index%20)==0){
+    }else if((widget.index%40)==0){
 
       star = true;
       boxAction = BoxAction.addExtraLife;
       duration = 1500;
 
-    } else if(widget.index > 20 && widget.index < 100){
+    } else if(widget.index > 40 && widget.index < 120){
 
       color = Random().nextInt(4) == 1 ? primary : white;
       if(color == primary){
-        if(Random().nextInt(3) == 1){
+        if(Random().nextInt(4) == 1){
           boxSize = (50+Random().nextInt(15)).toDouble();
           boxAction = BoxAction.add2Points;
           boxText = '+2';
@@ -74,7 +74,7 @@ class _FallingBoxState extends State<FallingBox> with TickerProviderStateMixin {
 
       color = Random().nextInt(4) == 1 ? primary : white;
       if(color == primary){
-        if(Random().nextInt(3) == 1){
+        if(Random().nextInt(4) == 1){
           boxSize = (50+Random().nextInt(40)).toDouble();
           boxAction = boxSize <= 65 ? BoxAction.add2Points : BoxAction.add3Points;
           boxText = boxSize <= 65 ? '+2' : '+3';

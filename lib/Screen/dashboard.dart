@@ -19,8 +19,45 @@ class _DashboardState extends State<Dashboard>
   Animation offsetAnimation;
   Animation offsetAnimation2;
   bool showRewardAd = false;
-  bool rewardAdsGotten=false;
-   RewardedAd myRewarded;
+  bool rewardAdsGotten = false;
+  RewardedAd myRewarded;
+
+  setAndLoadAd() {
+    myRewarded = RewardedAd.fromPublisherRequest(
+      adUnitId: '/6499/example/rewarded',
+      publisherRequest: PublisherAdRequest(),
+      listener: AdListener(
+        // Called when an ad is successfully received.
+        onAdLoaded: (Ad ad) => print('Ad loaded.'),
+        // Called when an ad request failed.
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          ad.dispose();
+          print('Ad failed to load: $error');
+        },
+        // Called when an ad opens an overlay that covers the screen.
+        onAdOpened: (Ad ad) => print('Ad opened.'),
+        // Called when an ad removes an overlay that covers the screen.
+        onAdClosed: (Ad ad) {
+          ad.dispose();
+          print('Ad closed.');
+          if (!rewardAdsGotten) {
+            controller.reverse();
+            context.read(gameInfoProvider).gameEnded();
+          }
+        },
+        // Called when an ad is in the process of leaving the application.
+        onApplicationExit: (Ad ad) => print('Ad Left application.'),
+        // Called when a RewardedAd triggers a reward.
+        onRewardedAdUserEarnedReward: (RewardedAd ad, RewardItem reward) {
+          print('Ad Reward earned: $reward');
+          setState(() {
+            rewardAdsGotten = true;
+          });
+        },
+      ),
+    );
+    myRewarded.load();
+  }
 
   @override
   void initState() {
@@ -33,36 +70,7 @@ class _DashboardState extends State<Dashboard>
     offsetAnimation2 = Tween<double>(begin: -0.4, end: 0).animate(
         CurvedAnimation(parent: controller, curve: Curves.easeInOutCirc));
 
-    // myRewarded = RewardedAd.fromPublisherRequest(
-    //   adUnitId: '/6499/example/rewarded',
-    //   publisherRequest: PublisherAdRequest(),
-    //   listener: AdListener(
-    //     // Called when an ad is successfully received.
-    //     onAdLoaded: (Ad ad) => print('Ad loaded.'),
-    //     // Called when an ad request failed.
-    //     onAdFailedToLoad: (Ad ad, LoadAdError error) {
-    //       ad.dispose();
-    //       print('Ad failed to load: $error');
-    //     },
-    //     // Called when an ad opens an overlay that covers the screen.
-    //     onAdOpened: (Ad ad) => print('Ad opened.'),
-    //     // Called when an ad removes an overlay that covers the screen.
-    //     onAdClosed: (Ad ad) {
-    //       ad.dispose();
-    //       print('Ad closed.');
-    //     },
-    //     // Called when an ad is in the process of leaving the application.
-    //     onApplicationExit: (Ad ad) => print('Left application.'),
-    //     // Called when a RewardedAd triggers a reward.
-    //     onRewardedAdUserEarnedReward: (RewardedAd ad, RewardItem reward) {
-    //       print('Reward earned: $reward');
-    //       setState(() {
-    //         rewardAdsGotten = true;
-    //       });
-    //     },
-    //   ),
-    // );
-    //myRewarded.load();
+    setAndLoadAd();
   }
 
   @override
@@ -74,35 +82,45 @@ class _DashboardState extends State<Dashboard>
           builder: (context, child) {
             return Stack(
               children: [
-
                 Transform.translate(
                     offset: Offset(0.0, size.height * offsetAnimation2.value),
                     child: GameArea(
-                        key: Key((offsetAnimation2.value == 0).toString()+rewardAdsGotten.toString()),
+                        key: Key((offsetAnimation2.value == 0).toString()),
                         screenSize: size,
                         gameInView: offsetAnimation2.value == 0,
-                        gameEnd: () async {
-
-                          if(context.read(gameInfoProvider).lives==0) {
+                        possibleGameEnd: () async {
+                          if (context.read(gameInfoProvider).lives == 0) {
                             controller.reverse();
                             context.read(gameInfoProvider).gameEnded();
                             return Future.value(false);
                           }
+
+                          bool isAdLoaded = await myRewarded.isLoaded();
                           var response = await showDialog(
                               context: context,
                               builder: (_) => Dialog(
-                                insetPadding: EdgeInsets.zero,
-                                elevation: 0,
-                                backgroundColor: Colors.transparent,
-                                child: RewardLoader(),
-                              ));
+                                    insetPadding: EdgeInsets.zero,
+                                    elevation: 0,
+                                    backgroundColor: Colors.transparent,
+                                    child: RewardLoader(
+                                      adLoaded: isAdLoaded,
+                                    ),
+                                  ));
 
-                          if(response){
-                            context.read(gameInfoProvider).decrementLives();
-                          }else{
+                          if (response == null || response == false) {
                             controller.reverse();
                             context.read(gameInfoProvider).gameEnded();
+                          } else {
+                            if (response == 'star') {
+                              context.read(gameInfoProvider).decrementLives();
+                            } else if (response == 'ads') {
+                              myRewarded.show();
+                            } else {
+                              controller.reverse();
+                              context.read(gameInfoProvider).gameEnded();
+                            }
                           }
+
                           return response;
                           //
                           // if (context.read(gameInfoProvider).seenRewardAds) {
@@ -141,7 +159,8 @@ class _DashboardState extends State<Dashboard>
                     offset: Offset(0.0, size.height * offsetAnimation.value),
                     child: Home(
                         yOffset: size.height * offsetAnimation.value,
-                        gameStart: () {
+                        gameStart: () async{
+                          if(!await(myRewarded.isLoaded()))setAndLoadAd();
                           controller.forward();
                           context.read(gameInfoProvider).gameStarted();
                         })),

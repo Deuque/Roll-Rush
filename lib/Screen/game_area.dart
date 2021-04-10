@@ -11,9 +11,9 @@ import 'package:roll_rush/main.dart';
 class GameArea extends StatefulWidget {
   final Size screenSize;
   final bool gameInView;
-  final Future<bool> Function() gameEnd;
+  final Future Function() possibleGameEnd;
 
-  const GameArea({Key key, this.screenSize, this.gameInView, this.gameEnd})
+  const GameArea({Key key, this.screenSize, this.gameInView, this.possibleGameEnd})
       : super(key: key);
 
   @override
@@ -41,6 +41,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
   double ballFieldBegin = 0.1;
   double ballFieldEnd = 0.9;
 
+  bool paused = false;
   Timer boxTimer;
 
   @override
@@ -56,10 +57,13 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
       if (boxTimer != null && boxTimer.isActive) boxTimer.cancel();
+      setState(() {
+        paused = true;
+      });
     }
-    if (state == AppLifecycleState.resumed) {
-      setFallingBoxesTimer();
-    }
+    // if (state == AppLifecycleState.resumed) {
+    //   setFallingBoxesTimer();
+    // }
   }
 
   @override
@@ -67,13 +71,14 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    setFallingBoxesTimer();
+    setFallingBoxTimer();
   }
 
-  setFallingBoxesTimer() {
+  setFallingBoxTimer() {
     if (!widget.gameInView) ballSize = 0;
-    if (widget.gameInView)
-      boxTimer = Timer.periodic(Duration(milliseconds: 1000), (Timer t) {
+    if (widget.gameInView) {
+      ballSize = 42;
+      boxTimer = Timer.periodic(Duration(milliseconds: 800), (Timer t) {
         children.add(new FallingBox(
           key: Key(children.length.toString()),
           checkOffset: checkOffset,
@@ -90,11 +95,26 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
         // }
         boxesController.sink.add(children);
       });
+    }
+  }
+
+  pauseGame() {
+    boxTimer.cancel();
+    ballTimer.cancel();
+    ballSize = 0;
+    paused = true;
+  }
+
+  continueGame() {
+    paused = false;
+    setFallingBoxTimer();
   }
 
   checkOffset(Offset x, int index, BoxAction boxAction, double boxSize) {
-    if (x == null || ballOffset == null || ballSize == 0 || checkingIndexes.contains(index))
-      return;
+    if (x == null ||
+        ballOffset == null ||
+        paused ||
+        checkingIndexes.contains(index)) return;
     final position1 = x;
     final position2 = ballOffset;
     double s1 = boxSize;
@@ -148,10 +168,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
           context.read(gameInfoProvider).incrementLives();
         }
       } else {
-        boxTimer.cancel();
-        ballTimer.cancel();
-        ballSize = 0;
-
+        pauseGame();
         playSound('end.wav', context);
         flareController.sink.add(List<Widget>.generate(
             30,
@@ -159,15 +176,10 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
                   initialOffset: ballOffset,
                   screenSize: widget.screenSize,
                 )));
+
         Future.delayed(Duration(seconds: 1), () {
           flareController.sink.add(<Widget>[]);
-          widget.gameEnd().then((value) {
-            if (value) {
-              setFallingBoxesTimer();
-              ballSize = 42;
-              setState(() {});
-            }
-          });
+          widget.possibleGameEnd();
         });
       }
       setState(() {});
@@ -183,6 +195,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
     //ballTimelyOffset = size.width*.001;
     return GestureDetector(
       onTapDown: (details) {
+        if(paused) return;
         playSound('tap.wav', context);
         ballOffset = ballOffset ?? _ballKey.globalPaintBounds.topLeft;
         bool right;
@@ -330,6 +343,28 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
                           );
                   },
                 ),
+              ),
+              Positioned(
+                top: size.height * .67,
+                left: 0,
+                right: 0,
+                child: Center(
+                    child: InkWell(
+                        customBorder: CircleBorder(),
+                        onTap: paused
+                            ? () {
+                                continueGame();
+                                setState(() {});
+                              }
+                            : () {
+                                pauseGame();
+                                setState(() {});
+                              },
+                        child: Image.asset(
+                          paused ? 'assets/play.png' : 'assets/pause.png',
+                          height: size.width * .075,
+                          color: white.withOpacity(.7),
+                        ))),
               ),
             ],
           ),

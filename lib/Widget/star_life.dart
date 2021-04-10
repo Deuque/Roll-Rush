@@ -13,10 +13,10 @@ class StarLife extends StatelessWidget {
         return Opacity(
           opacity: val,
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/star.png',height: 18,),
+              Image.asset('assets/star.png',height: 16,),
               SizedBox(width: 6,),
               Consumer(
                 builder:(_,watch,child){

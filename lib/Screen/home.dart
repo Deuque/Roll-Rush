@@ -4,6 +4,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:roll_rush/Controller/game_info_controller.dart';
 import 'package:roll_rush/Util/colors.dart';
 import 'package:roll_rush/Widget/star_life.dart';
+import 'package:share/share.dart';
 
 class Home extends StatelessWidget {
   final double yOffset;
@@ -66,15 +67,20 @@ class Home extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Center(
-                        child: Image.asset(
+                        child: InkWell(
+                          customBorder: CircleBorder(),
+                          onTap: () =>Share.share('Check out https://play.google.com/store/apps/details?id=com.dcdevs.roll_rush', subject: 'Can you beat my score?'),
+                          child: Image.asset(
                       'assets/link.png',
                       height: size.width * .1,
                       color: white.withOpacity(.7),
-                    )),
+                    ),
+                        )),
                   ),
                   Expanded(
                     child: Center(
                         child: InkWell(
+                            customBorder: CircleBorder(),
                             onTap: gameStart,
                             child:  Consumer(
                                 builder: (context, watch, child) {
@@ -89,6 +95,7 @@ class Home extends StatelessWidget {
                   Expanded(
                     child: Center(
                         child: InkWell(
+                          customBorder: CircleBorder(),
                           onTap: (){
                             context.read(gameInfoProvider).toggleSpeaker();
                           },

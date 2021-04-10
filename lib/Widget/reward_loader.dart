@@ -5,8 +5,9 @@ import 'package:roll_rush/Util/colors.dart';
 class RewardLoader extends StatefulWidget {
   // final Function onCancel;
   // final Function onShowReward;
+  final bool adLoaded;
 
-  const RewardLoader({Key key})
+  const RewardLoader({Key key,this.adLoaded})
       : super(key: key);
 
   @override
@@ -46,14 +47,23 @@ class _RewardLoaderState extends State<RewardLoader>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text(
+              'Continue',
+              style: TextStyle(
+                  color: white, fontWeight: FontWeight.w400,
+                  fontSize: 16),
+            ),
+            SizedBox(
+              height: 25,
+            ),
             Stack(
               children: [
                 AnimatedBuilder(
                     animation: controller,
                     builder: (context, child) {
                       return Container(
-                        height: 170,
-                        width: 170,
+                        height: widget.adLoaded ? 200 : 150,
+                        width: widget.adLoaded ? 200 : 150,
                         child: CircularProgressIndicator(
                           strokeWidth: 10,
                           value: progressAnimation.value,
@@ -68,25 +78,22 @@ class _RewardLoaderState extends State<RewardLoader>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          'Continue',
-                          style: TextStyle(
-                              color: primary, fontWeight: FontWeight.w400,
-                              fontSize: 15),
-                        ),
-                        SizedBox(height: 15,),
 
                         ElevatedButton(
                             onPressed: () {
                               controller.stop();
                               // widget.onCancel();
-                              Navigator.pop(context,true);
+                              Navigator.pop(context,'star');
                             },
                             style: TextButton.styleFrom(
                                 backgroundColor: white.withOpacity(.2),
-                                shape: StadiumBorder()),
+                                shape: StadiumBorder(),
+                            textStyle:  TextStyle(
+                                color: white.withOpacity(.8),
+                                fontSize: 16
+                            )),
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Image.asset('assets/star.png',height: 16,),
@@ -95,9 +102,52 @@ class _RewardLoaderState extends State<RewardLoader>
                                   '1',
                                   style: TextStyle(
                                       color: white.withOpacity(.8),
-                                      fontSize: 16
+                                      fontSize: 15
                                   ),
                                 )
+                              ],
+                            ),),
+                        if(widget.adLoaded)
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text(
+                              'Or',
+                              style: TextStyle(
+                                  color: white.withOpacity(.8), fontWeight: FontWeight.w400,
+                                  fontSize: 14),
+                            ),
+                          ),
+                        if(widget.adLoaded)
+                          ElevatedButton(
+                            onPressed: () {
+                              controller.stop();
+                              // widget.onCancel();
+                              Navigator.pop(context,'ads');
+                            },
+
+                            style: TextButton.styleFrom(
+                                backgroundColor: primary,
+                                shape: StadiumBorder(),
+                            textStyle: TextStyle(
+                              color: white,
+                              fontSize: 15,
+                            )),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Watch Ad',
+                                  style: TextStyle(
+                                      color: white,
+                                      fontSize: 15,
+
+                                  ),
+                                ),
+                                SizedBox(width: 6,),
+                                Image.asset('assets/play.png',height: 14,color: white,),
+
+
                               ],
                             ),)
                       ],
