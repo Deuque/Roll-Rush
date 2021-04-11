@@ -23,8 +23,11 @@ class _DashboardState extends State<Dashboard>
   RewardedAd myRewarded;
 
   setAndLoadAd() {
+    if(rewardAdsGotten)setState((){
+      rewardAdsGotten = false;
+    });
     myRewarded = RewardedAd.fromPublisherRequest(
-      adUnitId: '/6499/example/rewarded',
+      adUnitId: 'ca-app-pub-3336082214483449/1135114310',
       publisherRequest: PublisherAdRequest(),
       listener: AdListener(
         // Called when an ad is successfully received.
@@ -44,6 +47,8 @@ class _DashboardState extends State<Dashboard>
             controller.reverse();
             context.read(gameInfoProvider).gameEnded();
           }
+
+
         },
         // Called when an ad is in the process of leaving the application.
         onApplicationExit: (Ad ad) => print('Ad Left application.'),
@@ -89,13 +94,15 @@ class _DashboardState extends State<Dashboard>
                         screenSize: size,
                         gameInView: offsetAnimation2.value == 0,
                         possibleGameEnd: () async {
-                          if (context.read(gameInfoProvider).lives == 0) {
+                          bool isAdLoaded = await myRewarded.isLoaded();
+                          bool hasLives = context.read(gameInfoProvider).lives > 0;
+                          if (!hasLives && !isAdLoaded) {
                             controller.reverse();
                             context.read(gameInfoProvider).gameEnded();
                             return Future.value(false);
                           }
 
-                          bool isAdLoaded = await myRewarded.isLoaded();
+
                           var response = await showDialog(
                               context: context,
                               builder: (_) => Dialog(
@@ -104,6 +111,7 @@ class _DashboardState extends State<Dashboard>
                                     backgroundColor: Colors.transparent,
                                     child: RewardLoader(
                                       adLoaded: isAdLoaded,
+                                      hasLives: hasLives,
                                     ),
                                   ));
 

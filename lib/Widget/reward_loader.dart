@@ -6,8 +6,9 @@ class RewardLoader extends StatefulWidget {
   // final Function onCancel;
   // final Function onShowReward;
   final bool adLoaded;
+  final bool hasLives;
 
-  const RewardLoader({Key key,this.adLoaded})
+  const RewardLoader({Key key,this.adLoaded, this.hasLives})
       : super(key: key);
 
   @override
@@ -43,7 +44,7 @@ class _RewardLoaderState extends State<RewardLoader>
       child: Container(
         height: double.infinity,
         width: double.infinity,
-        color: black.withOpacity(.15),
+        color: black.withOpacity(.32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -62,8 +63,8 @@ class _RewardLoaderState extends State<RewardLoader>
                     animation: controller,
                     builder: (context, child) {
                       return Container(
-                        height: widget.adLoaded ? 200 : 150,
-                        width: widget.adLoaded ? 200 : 150,
+                        height: (widget.adLoaded && widget.hasLives)? 200 : 150,
+                        width: (widget.adLoaded && widget.hasLives) ? 200 : 150,
                         child: CircularProgressIndicator(
                           strokeWidth: 10,
                           value: progressAnimation.value,
@@ -78,7 +79,7 @@ class _RewardLoaderState extends State<RewardLoader>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-
+                      if(widget.hasLives)
                         ElevatedButton(
                             onPressed: () {
                               controller.stop();
@@ -107,7 +108,7 @@ class _RewardLoaderState extends State<RewardLoader>
                                 )
                               ],
                             ),),
-                        if(widget.adLoaded)
+                        if((widget.adLoaded && widget.hasLives))
                           Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Text(

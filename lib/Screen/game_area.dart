@@ -36,7 +36,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
   Color ballColor = primary;
   double ballSize = 42;
   double ballFieldHeight = 42;
-  double ballTimelyOffset = 1.5;
+  double ballTimelyOffset = 0.415;
   int ballOffsetDuration = 1;
   double ballFieldBegin = 0.1;
   double ballFieldEnd = 0.9;
@@ -56,10 +56,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      if (boxTimer != null && boxTimer.isActive) boxTimer.cancel();
-      setState(() {
-        paused = true;
-      });
+      pauseGame();
     }
     // if (state == AppLifecycleState.resumed) {
     //   setFallingBoxesTimer();
@@ -99,14 +96,18 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
   }
 
   pauseGame() {
-    boxTimer.cancel();
-    ballTimer.cancel();
+    if (boxTimer != null && boxTimer.isActive) boxTimer.cancel();
+    if (ballTimer != null && ballTimer.isActive) ballTimer.cancel();
     ballSize = 0;
-    paused = true;
+    setState(() {
+      paused = true;
+    });
   }
 
   continueGame() {
-    paused = false;
+    setState(() {
+      paused = false;
+    });
     setFallingBoxTimer();
   }
 
@@ -354,11 +355,9 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
                         onTap: paused
                             ? () {
                                 continueGame();
-                                setState(() {});
                               }
                             : () {
                                 pauseGame();
-                                setState(() {});
                               },
                         child: Image.asset(
                           paused ? 'assets/play.png' : 'assets/pause.png',
