@@ -55,7 +55,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.paused && !paused) {
       pauseGame();
     }
     // if (state == AppLifecycleState.resumed) {
@@ -74,7 +74,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
   setFallingBoxTimer() {
     if (!widget.gameInView) ballSize = 0;
     if (widget.gameInView) {
-      ballSize = 42;
+      //ballSize = 42;
       boxTimer = Timer.periodic(Duration(milliseconds: 800), (Timer t) {
         children.add(new FallingBox(
           key: Key(children.length.toString()),
@@ -99,6 +99,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
     if (boxTimer != null && boxTimer.isActive) boxTimer.cancel();
     if (ballTimer != null && ballTimer.isActive) ballTimer.cancel();
     ballSize = 0;
+    checkingIndexes=[];
     setState(() {
       paused = true;
     });
@@ -107,6 +108,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
   continueGame() {
     setState(() {
       paused = false;
+      ballSize=42;
     });
     setFallingBoxTimer();
   }
@@ -180,6 +182,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
 
         Future.delayed(Duration(seconds: 1), () {
           flareController.sink.add(<Widget>[]);
+
           widget.possibleGameEnd();
         });
       }
@@ -206,7 +209,7 @@ class _GameAreaState extends State<GameArea> with WidgetsBindingObserver {
           right = false;
         }
 
-        ballTimer?.cancel();
+        if(ballTimer!=null && ballTimer.isActive)ballTimer.cancel();
         if (right) {
           ballTimer = Timer.periodic(Duration(milliseconds: ballOffsetDuration),
               (Timer t) {
